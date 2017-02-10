@@ -12,18 +12,31 @@ class CarAdvertsRoute(service: CarAdvertService) extends JsonSupport {
 
   val route = Directives.pathPrefix("adverts") {
     get {
-      pathPrefix(IntNumber) { id =>
-        service.find(id) match {
-          case Some(advert) => complete(advert)
-          case _ => complete(NotFound)
+      pathEndOrSingleSlash {
+        complete(service.findAll())
+      } ~
+        pathPrefix(IntNumber) { id =>
+          service.find(id) match {
+            case Some(advert) => complete(advert)
+            case _ => complete(NotFound)
+          }
         }
-      }
     }
   } ~
     post {
       entity(as[CarAdvert]) { carAdvert =>
-        service.addOrModify(carAdvert)
-        complete(OK)
+        service.addOrModify(carAdvert) match {
+          case Some(_) => complete(OK)
+          case _ => complete(Created)
+        }
+      }
+    } ~
+    delete {
+      pathPrefix(IntNumber) { id =>
+        service.delete(id) match {
+          case Some(_) => complete(OK)
+          case _ => complete(NotFound)
+        }
       }
     }
 }

@@ -9,6 +9,7 @@ import me.caradverts.domain.domain.{CarAdvert, FuelType}
 import spray.json._
 
 object JsonSupport {
+  // todo: move somewhere else :)
   val simpleDateFormat = new ThreadLocal[SimpleDateFormat] {
     override def initialValue(): SimpleDateFormat = new SimpleDateFormat("yyyy-MM-dd")
   }

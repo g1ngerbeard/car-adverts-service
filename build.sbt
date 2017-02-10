@@ -14,6 +14,7 @@ libraryDependencies ++= {
     "com.typesafe.akka" %% "akka-http-core" % akkaHttpVersion,
     "com.typesafe.akka" %% "akka-http" % akkaHttpVersion,
     "com.typesafe.akka" %% "akka-http-spray-json" % akkaHttpVersion,
+    "com.typesafe.akka" %% "akka-http-testkit" % akkaHttpVersion % "test",
     "org.scalatest" %% "scalatest" % scalaTestVersion % "test",
     "org.slf4j" % "slf4j-nop" % slf4jVersion,
     "com.typesafe" % "config" % typeSafeConfig

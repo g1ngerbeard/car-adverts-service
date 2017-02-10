@@ -8,14 +8,14 @@ import me.caradverts.domain.domain._
 trait CarAdvertService {
 
   // todo: partial update
-  def addOrModify(carAdvert: CarAdvert): Unit
+  def addOrModify(carAdvert: CarAdvert): Option[CarAdvert]
 
   def find(id: Int): Option[CarAdvert]
 
   // todo: add sorting criteria
   def findAll(): List[CarAdvert]
 
-  def delete(id: Int): Unit
+  def delete(id: Int): Option[CarAdvert]
 
 }
 
@@ -23,11 +23,11 @@ class InMemCarAdvertService extends CarAdvertService {
 
   val storage: TrieMap[Int, CarAdvert] = TrieMap()
 
-  override def addOrModify(carAdvert: CarAdvert): Unit = storage += (carAdvert.id -> carAdvert)
+  override def addOrModify(carAdvert: CarAdvert): Option[CarAdvert] = storage.put(carAdvert.id, carAdvert)
 
   override def findAll(): List[CarAdvert] = storage.values.toList
 
-  override def delete(id: Int): Unit = storage -= id
+  override def delete(id: Int): Option[CarAdvert] = storage.remove(id)
 
   override def find(id: Int): Option[CarAdvert] = storage.get(id)
 }
