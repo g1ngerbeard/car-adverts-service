@@ -1,6 +1,7 @@
 package me
 
-import java.util.Date
+import java.time.Instant
+import java.time.temporal.ChronoUnit
 
 import me.caradverts.domain.domain.{CarAdvert, FuelType}
 
@@ -10,11 +11,15 @@ package object caradverts {
 
   def randomAdvert(): CarAdvert = {
     val fuelType = FuelType.values.toList(Random.nextInt(FuelType.values.size))
-    val advert = CarAdvert(Random.nextInt(Int.MaxValue), Random.nextString(10), fuelType, Random.nextInt(10000))
+    val id = Random.nextInt(Int.MaxValue)
+    val title = Random.nextString(10)
+    val price = Random.nextInt(10000)
+
+    val advert = CarAdvert(id, title, fuelType, price)
 
     if (Random.nextBoolean()) {
-      // val date = new Date(LocalDate.of(1970, 1, 1).plus(Random.nextInt(17000), DAYS).toEpochDay)
-      advert.copy(isNew = false, mileage = Some(Random.nextInt(10000)), firstRegistration = Some(new Date))
+      val date = Instant.now().truncatedTo(ChronoUnit.DAYS)
+      advert.copy(isNew = false, mileage = Some(Random.nextInt(10000)), firstRegistration = Some(date))
     } else {
       advert
     }
@@ -24,17 +29,33 @@ package object caradverts {
     (1 to n).map(i => randomAdvert()).toList
   }
 
-//  def randomAdvertJson(advert: CarAdvert): String = {
-//    s"""
-//       |{
-//       |"id": ${advert.id},
-//       |"title": "${advert.title}",
-//       |"price": ${advert.price},
-//       |"fuel": "${advert.fuel}",
-//       |"isNew": false,
-//       |"mileage": ${Random.nextInt(100000)},
-//       |"firstRegistration": "1992-07-24"
-//       |}
-//       |""".stripMargin
-//  }
+  // todo: use JsonSupport instead?
+  // todo: return json structure
+  def advert2Json(advert: CarAdvert): String = {
+    import me.caradverts.json.DateParser._
+
+    if (advert.isNew) {
+      s"""
+         |{
+         |"id": ${advert.id},
+         |"title": "${advert.title}",
+         |"price": ${advert.price},
+         |"fuel": "${advert.fuel}",
+         |"isNew": true
+         |}
+         |""".stripMargin
+    } else {
+      s"""
+         |{
+         |"id": ${advert.id},
+         |"title": "${advert.title}",
+         |"price": ${advert.price},
+         |"fuel": "${advert.fuel}",
+         |"isNew": false,
+         |"mileage": ${advert.mileage.get},
+         |"firstRegistration": "${formatDate(advert.firstRegistration.get)}"
+         |}
+         |""".stripMargin
+    }
+  }
 }
