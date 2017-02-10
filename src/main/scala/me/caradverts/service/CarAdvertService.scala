@@ -7,6 +7,7 @@ import me.caradverts.domain.domain._
 // todo: async interface?
 trait CarAdvertService {
 
+  // todo: partial update
   def addOrModify(carAdvert: CarAdvert): Unit
 
   def find(id: Int): Option[CarAdvert]

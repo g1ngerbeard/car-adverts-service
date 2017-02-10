@@ -1,6 +1,8 @@
 package me.caradverts.domain
 
-import java.time.Instant
+import java.util.Date
+
+import me.caradverts.domain.domain.FuelType.FuelType
 
 object domain {
 
@@ -10,8 +12,8 @@ object domain {
                        price: Int,
                        isNew: Boolean = true,
                        mileage: Option[Int] = None,
-                       firstRegistration: Option[Instant] = None) {
-
+                       // todo: replace with Instant
+                       firstRegistration: Option[Date] = None) {
     require(title.nonEmpty, "Title is empty")
     if (!isNew) {
       require(mileage.nonEmpty, "Mileage is not defined")
@@ -19,10 +21,9 @@ object domain {
     }
   }
 
-  sealed trait FuelType
-
-  case object Gasoline extends FuelType
-
-  case object Diesel extends FuelType
+  object FuelType extends Enumeration {
+    type FuelType = Value
+    val gasoline, diesel = Value
+  }
 
 }
