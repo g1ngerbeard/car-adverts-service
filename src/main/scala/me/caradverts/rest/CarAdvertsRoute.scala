@@ -21,22 +21,22 @@ class CarAdvertsRoute(service: CarAdvertService) extends JsonSupport {
             case _ => complete(NotFound)
           }
         }
-    }
-  } ~
-    post {
-      entity(as[CarAdvert]) { carAdvert =>
-        service.addOrModify(carAdvert) match {
-          case Some(_) => complete(OK)
-          case _ => complete(Created)
-        }
-      }
     } ~
-    delete {
-      pathPrefix(IntNumber) { id =>
-        service.delete(id) match {
-          case Some(_) => complete(OK)
-          case _ => complete(NotFound)
+      post {
+        entity(as[CarAdvert]) { carAdvert =>
+          service.addOrModify(carAdvert) match {
+            case Some(_) => complete(OK)
+            case _ => complete(Created)
+          }
+        }
+      } ~
+      delete {
+        pathPrefix(IntNumber) { id =>
+          service.delete(id) match {
+            case Some(_) => complete(OK)
+            case _ => complete(NotFound)
+          }
         }
       }
-    }
+  }
 }

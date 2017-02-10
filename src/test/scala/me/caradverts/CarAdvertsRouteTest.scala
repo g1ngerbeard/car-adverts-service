@@ -40,14 +40,14 @@ class CarAdvertsRouteTest extends WordSpec with Matchers with ScalatestRouteTest
     }
 
     "update advert" in new TestContext {
-      val existingId = existingAdverts(3).id
+      val existingId = existingAdverts(2).id
       val newAdvert = randomAdvert().copy(id = existingId)
 
       val requestEntity = HttpEntity(MediaTypes.`application/json`, advert2Json(newAdvert))
 
       Post("/adverts", requestEntity) ~> route ~> check {
         response.status shouldBe OK
-        service.find(existingId) shouldBe newAdvert
+        service.find(existingId) shouldBe Some(newAdvert)
       }
     }
 
@@ -72,6 +72,7 @@ class CarAdvertsRouteTest extends WordSpec with Matchers with ScalatestRouteTest
 
       Delete(s"/adverts/$existindId") ~> route ~> check {
         response.status shouldBe OK
+        service.find(existindId) shouldBe None
       }
     }
 
