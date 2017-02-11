@@ -1,19 +1,19 @@
 package me.caradverts.json
 
-import java.time.{ZoneOffset, LocalDate, Instant}
 import java.time.ZoneId._
 import java.time.format.DateTimeFormatter
+import java.time.{Instant, LocalDate, ZoneOffset}
 import java.util.Locale._
 
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport
-import me.caradverts.domain.domain.FuelType.FuelType
-import me.caradverts.domain.domain.{CarAdvert, FuelType}
+import me.caradverts.model._
 import spray.json._
 
 object DateParser {
 
   //  todo: make it an implicit convertion
   val formatter = DateTimeFormatter
+    // todo: use JS date format
     .ofPattern("yyyy-MM-dd")
     .withLocale(ENGLISH)
     .withZone(systemDefault())
@@ -26,7 +26,7 @@ object DateParser {
       .toInstant(ZoneOffset.UTC)
 }
 
-trait JsonSupport extends DefaultJsonProtocol with SprayJsonSupport {
+trait JsonSupport extends DefaultJsonProtocol with SprayJsonSupport with EnumJsonProtocol {
 
   import DateParser._
 
@@ -42,15 +42,7 @@ trait JsonSupport extends DefaultJsonProtocol with SprayJsonSupport {
     }
   }
 
-  implicit val fuelFormat = new JsonFormat[FuelType] {
-
-    def write(obj: FuelType) = JsString(obj.toString)
-
-    def read(value: JsValue) = value match {
-      case JsString(name) => FuelType.withName(name)
-      case _ => deserializationError("String with fuel type expected")
-    }
-  }
+  implicit val fuelFormat = enumFormat(FuelType)
 
   implicit val carAdvertFormat = jsonFormat7(CarAdvert)
 

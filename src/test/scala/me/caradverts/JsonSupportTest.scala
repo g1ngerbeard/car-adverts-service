@@ -1,6 +1,6 @@
 package me.caradverts
 
-import me.caradverts.domain.domain.CarAdvert
+import me.caradverts.model.CarAdvert
 import me.caradverts.json.{DateParser, JsonSupport}
 import org.scalatest.{Matchers, WordSpec}
 import spray.json._

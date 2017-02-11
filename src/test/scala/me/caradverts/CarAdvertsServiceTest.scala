@@ -33,7 +33,7 @@ class CarAdvertsServiceTest extends WordSpec with Matchers {
     "list all advertisements" in new TestContext {
       val testValues = randomAdverts(5)
       testValues.foreach(service.addOrModify)
-      service.findAll() should contain allElementsOf testValues
+      service.findAll(None) should contain allElementsOf testValues
     }
   }
 }

@@ -3,10 +3,11 @@ package me.caradverts
 import akka.http.scaladsl.model.StatusCodes._
 import akka.http.scaladsl.model.{HttpEntity, MediaTypes}
 import akka.http.scaladsl.testkit.ScalatestRouteTest
-import me.caradverts.domain.domain.CarAdvert
 import me.caradverts.json.JsonSupport
+import me.caradverts.model.CarAdvert
 import me.caradverts.rest.CarAdvertsRoute
 import me.caradverts.service.InMemCarAdvertService
+import org.scalatest.enablers.Sortable
 import org.scalatest.{Matchers, WordSpec}
 
 import scala.util.Random
@@ -14,7 +15,9 @@ import scala.util.Random
 class CarAdvertsRouteTest extends WordSpec with Matchers with ScalatestRouteTest {
 
   trait TestContext extends JsonSupport {
+
     val service = new InMemCarAdvertService
+
     val route = new CarAdvertsRoute(service).route
 
     val existingAdverts = onboardAdverts(3)
@@ -60,7 +63,7 @@ class CarAdvertsRouteTest extends WordSpec with Matchers with ScalatestRouteTest
     }
 
     "return 404 for non-existing advert" in new TestContext {
-      val randomId = Random.nextInt()
+      val randomId = Random.nextInt(Int.MaxValue)
 
       Get(s"/adverts/$randomId") ~> route ~> check {
         response.status shouldBe NotFound
@@ -81,14 +84,33 @@ class CarAdvertsRouteTest extends WordSpec with Matchers with ScalatestRouteTest
         responseAs[List[CarAdvert]] should have size 3
       }
     }
+
+    "list adverts sorted by id" in sortingContext("id", _.id)
+
+    "list adverts sorted by price" in sortingContext("price", _.price)
+
+    "list adverts sorted by title" in sortingContext("title", _.title)
+
+    "list adverts sorted by mileage" in sortingContext("mileage", _.mileage)
+
+    "list adverts sorted by fuel" in sortingContext("fuel", _.fuel)
+
+    "list adverts sorted by firstRegistration" in sortingContext("firstRegistration", _.firstRegistration)
+
+  }
+
+  def sortingContext[T](fieldName: String, mapper: CarAdvert => T)(implicit sortable: Sortable[List[T]]) = {
+    new TestContext {
+      Get(s"/adverts?sortBy=$fieldName") ~> route ~> check {
+        responseAs[List[CarAdvert]].map(mapper) shouldBe sorted
+      }
+    }
   }
 
   //  todo: car adverts rest service should:
 
   //  fail on incorrect data (id, title, fuel, price, isNew, mileage, registration)
   //  fail on missing data (id, title, fuel, price, isNew, old car without mileage and registration)
-
-  //  order list by (id, title, fuel, price)
 
   //  handle CORS
 
