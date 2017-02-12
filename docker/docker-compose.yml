@@ -1,6 +1,5 @@
 mongo:
   image: mongo:3.4.2
-  net: host
   expose:
     - "27017"
   ports:

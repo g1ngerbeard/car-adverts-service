@@ -14,7 +14,7 @@ class JsonSupportTest extends WordSpec with Matchers {
 
       val date = DateParser.parseDate("2010-10-10")
 
-      val advert = randomAdvert().copy(isNew = false, mileage = Some(10000), firstRegistration = Some(date))
+      val advert = randomAdvert().copy(`new` = false, mileage = Some(10000), firstRegistration = Some(date))
       val json = advert.toJson
       val deserialized = json.convertTo[CarAdvert]
 
@@ -23,7 +23,7 @@ class JsonSupportTest extends WordSpec with Matchers {
 
     "deserialize json" in new JsonSupport {
       val advert = randomAdvert().copy(
-        isNew = false,
+        `new` = false,
         mileage = Some(Random.nextInt(200000)),
         firstRegistration = Some(DateParser.parseDate("1999-07-22"))
       )
@@ -35,7 +35,7 @@ class JsonSupportTest extends WordSpec with Matchers {
            |"title": "${advert.title}",
            |"price": ${advert.price},
            |"fuel": "${advert.fuel.toString}",
-           |"isNew": false,
+           |"new": false,
            |"mileage": ${advert.mileage.get},
            |"firstRegistration": "1999-07-22"
            |}

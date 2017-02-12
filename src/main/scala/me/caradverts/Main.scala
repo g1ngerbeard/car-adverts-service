@@ -23,7 +23,7 @@ object Main extends App {
     case cfg: MongoStorageConfig => new MongoCardAdvertService(cfg)
   }
 
-  val carAdvertsRoute = new CarAdvertsRoute(service)
+  val carAdvertsRoute = new CarAdvertsRoute(service, config.http.allowedOrigin)
 
   Http().bindAndHandle(carAdvertsRoute.route, config.http.host, config.http.port)
 

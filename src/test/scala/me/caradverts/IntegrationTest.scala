@@ -14,8 +14,8 @@ import scala.util.Random
 class IntegrationTest extends DefaultSpec with EmbeddedMongoSupport {
 
   trait TestContext {
-    val service = new MongoCardAdvertService(MongoStorageConfig("localhost", 12345))
-    val route = new CarAdvertsRoute(service).route
+    val service = new MongoCardAdvertService(MongoStorageConfig("localhost", 12345, "db"))
+    val route = new CarAdvertsRoute(service, "*").route
   }
 
   "Car adverts service" should {

@@ -8,9 +8,11 @@ case class CarAdvert(id: Int,
                      title: String,
                      fuel: FuelType,
                      price: Int,
-                     isNew: Boolean = true,
+                     `new`: Boolean = true,
                      mileage: Option[Int] = None,
                      firstRegistration: Option[Instant] = None) {
+  def isNew = `new`
+
   require(title.nonEmpty, "Title is empty")
   if (!isNew) {
     require(mileage.isDefined, "Mileage is not defined")

@@ -15,7 +15,7 @@ class CarAdvertsRouteTest extends DefaultSpec {
 
   trait TestContext {
     val service = new InMemCarAdvertService
-    val route = new CarAdvertsRoute(service).route
+    val route = new CarAdvertsRoute(service, "*").route
 
     val existingAdverts = onboardAdverts(3)
 

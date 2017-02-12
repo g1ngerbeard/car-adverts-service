@@ -15,21 +15,19 @@ class MongoCardAdvertService(cfg: MongoStorageConfig)
   extends CarAdvertService with JsonSupport {
 
   val advertsCollection = MongoClient(s"mongodb://${cfg.host}:${cfg.port}")
-    .getDatabase("db")
+    .getDatabase(cfg.databaseName)
     .getCollection("adverts")
 
   def create(carAdvert: CarAdvert): Future[CarAdvert] = {
-    val document = Document(carAdvert.toJson.toString) + ("_id" -> carAdvert.id)
     advertsCollection
-      .insertOne(document)
+      .insertOne(cardAdvert2document(carAdvert))
       .toFuture()
       .map(seq => carAdvert)
   }
 
   def update(carAdvert: CarAdvert): Future[CarAdvert] = {
-    val document = Document(carAdvert.toJson.toString) + ("_id" -> carAdvert.id)
     advertsCollection
-      .replaceOne(Filters.eq("_id", carAdvert.id), document)
+      .replaceOne(Filters.eq("_id", carAdvert.id), cardAdvert2document(carAdvert))
       .toFuture()
       .map(res => carAdvert)
   }
@@ -57,5 +55,9 @@ class MongoCardAdvertService(cfg: MongoStorageConfig)
 
   private def document2CardAdvert(document: Document): CarAdvert = {
     document.toJson().parseJson.convertTo[CarAdvert]
+  }
+
+  private def cardAdvert2document(carAdvert: CarAdvert): Document= {
+    Document(carAdvert.toJson.toString) + ("_id" -> carAdvert.id)
   }
 }

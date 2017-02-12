@@ -22,7 +22,7 @@ trait CarAdvertService {
         case "price" => list.sortBy(_.price)
         case "title" => list.sortBy(_.title)
         case "fuel" => list.sortBy(_.fuel)
-        case "isNew" => list.sortBy(_.isNew)
+        case "new" => list.sortBy(_.isNew)
         case "mileage" => list.sortBy(_.mileage)
         case "firstRegistration" => list.sortBy(_.firstRegistration)
         case _ => throw new IllegalArgumentException("Invalid field name")

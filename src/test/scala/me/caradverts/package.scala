@@ -19,7 +19,7 @@ package object caradverts {
 
     if (Random.nextBoolean()) {
       val date = Instant.now().truncatedTo(ChronoUnit.DAYS)
-      advert.copy(isNew = false, mileage = Some(Random.nextInt(10000)), firstRegistration = Some(date))
+      advert.copy(`new` = false, mileage = Some(Random.nextInt(10000)), firstRegistration = Some(date))
     } else {
       advert
     }
