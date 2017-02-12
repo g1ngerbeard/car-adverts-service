@@ -2,47 +2,35 @@ package me.caradverts.service
 
 import me.caradverts.model._
 
-import scala.collection.concurrent.TrieMap
+import scala.concurrent.{ExecutionContext, Future}
 
-// todo: async interface?
 trait CarAdvertService {
 
-  def addOrModify(carAdvert: CarAdvert): Option[CarAdvert]
+  // todo: split into update and insert
+  def addOrModify(carAdvert: CarAdvert): Future[Boolean]
 
-  def find(id: Int): Option[CarAdvert]
+  def find(id: Int): Future[Option[CarAdvert]]
 
-  def findAll(sortBy: Option[String]): List[CarAdvert] = {
-    val list = findAllUnsorted()
+  def findAll(sortBy: Option[String])
+             (implicit executionContext: ExecutionContext): Future[List[CarAdvert]] = {
+    findAllUnsorted().map(list => {
+      val fieldName = sortBy getOrElse "id"
 
-    val fieldName = sortBy getOrElse "id"
-
-    fieldName match {
-      case "id" => list.sortBy(_.id)
-      case "price" => list.sortBy(_.price)
-      case "title" => list.sortBy(_.title)
-      case "fuel" => list.sortBy(_.fuel)
-      case "isNew" => list.sortBy(_.isNew)
-      case "mileage" => list.sortBy(_.mileage)
-      case "firstRegistration" => list.sortBy(_.firstRegistration)
-      case _ => throw new IllegalArgumentException("Invalid field name")
-    }
+      fieldName match {
+        case "id" => list.sortBy(_.id)
+        case "price" => list.sortBy(_.price)
+        case "title" => list.sortBy(_.title)
+        case "fuel" => list.sortBy(_.fuel)
+        case "isNew" => list.sortBy(_.isNew)
+        case "mileage" => list.sortBy(_.mileage)
+        case "firstRegistration" => list.sortBy(_.firstRegistration)
+        case _ => throw new IllegalArgumentException("Invalid field name")
+      }
+    })
   }
 
-  def findAllUnsorted(): List[CarAdvert]
+  def findAllUnsorted(): Future[List[CarAdvert]]
 
-  def delete(id: Int): Option[CarAdvert]
+  def delete(id: Int): Future[Boolean]
 
-}
-
-class InMemCarAdvertService extends CarAdvertService {
-
-  val storage: TrieMap[Int, CarAdvert] = TrieMap()
-
-  override def addOrModify(carAdvert: CarAdvert): Option[CarAdvert] = storage.put(carAdvert.id, carAdvert)
-
-  override def findAllUnsorted(): List[CarAdvert] = storage.values.toList
-
-  override def delete(id: Int): Option[CarAdvert] = storage.remove(id)
-
-  override def find(id: Int): Option[CarAdvert] = storage.get(id)
 }

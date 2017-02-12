@@ -6,38 +6,36 @@ import akka.http.scaladsl.server.PathMatchers.IntNumber
 import me.caradverts.json.JsonSupport
 import me.caradverts.model.CarAdvert
 import me.caradverts.service.CarAdvertService
+import spray.json._
 
-class CarAdvertsRoute(service: CarAdvertService) extends JsonSupport {
+import scala.concurrent.ExecutionContext
+
+class CarAdvertsRoute(service: CarAdvertService)(implicit executionContext: ExecutionContext)
+  extends JsonSupport {
 
   val route =
     pathPrefix("adverts") {
       get {
         pathEndOrSingleSlash {
           parameter('sortBy.?) { p =>
-            complete(service.findAll(p))
+            complete(service.findAll(p).map(_.toJson))
           }
         } ~
           pathPrefix(IntNumber) { id =>
-            service.find(id) match {
-              case Some(advert) => complete(advert)
+            onSuccess(service.find(id)) {
+              case Some(advert) => complete(advert.toJson)
               case _ => complete(NotFound)
             }
           }
       } ~
         post {
           entity(as[CarAdvert]) { carAdvert =>
-            service.addOrModify(carAdvert) match {
-              case Some(_) => complete(OK)
-              case _ => complete(Created)
-            }
+            complete(service.addOrModify(carAdvert).map(if (_) OK else Created))
           }
         } ~
         delete {
           pathPrefix(IntNumber) { id =>
-            service.delete(id) match {
-              case Some(_) => complete(OK)
-              case _ => complete(NotFound)
-            }
+            complete(service.delete(id).map(if (_) OK else NotFound))
           }
         }
     }

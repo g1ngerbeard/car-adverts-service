@@ -4,7 +4,6 @@ import java.time.Instant
 import java.time.temporal.ChronoUnit
 
 import me.caradverts.model.{CarAdvert, FuelType}
-import spray.json._
 
 import scala.util.Random
 
@@ -30,31 +29,4 @@ package object caradverts {
     (1 to n).map(i => randomAdvert()).toList
   }
 
-  def advert2Json(advert: CarAdvert): String = {
-    import me.caradverts.json.DateParser._
-
-    implicit def string2jsString(str: String): JsValue = JsString(str)
-
-    implicit def int2jsNumber(i: Int): JsValue = JsNumber(i)
-
-    if (advert.isNew) {
-      JsObject(
-        "id" -> advert.id,
-        "title" -> advert.title,
-        "price" -> advert.price,
-        "fuel" -> advert.fuel.toString,
-        "isNew" -> JsTrue
-      ).toString
-    } else {
-      JsObject(
-        "id" -> advert.id,
-        "title" -> advert.title,
-        "price" -> advert.price,
-        "fuel" -> advert.fuel.toString,
-        "isNew" -> JsFalse,
-        "mileage" -> advert.mileage.get,
-        "firstRegistration" -> formatDate(advert.firstRegistration.get)
-      ).toString
-    }
-  }
 }

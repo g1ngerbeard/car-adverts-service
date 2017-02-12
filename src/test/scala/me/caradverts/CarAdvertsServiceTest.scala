@@ -1,9 +1,13 @@
 package me.caradverts
 
+import akka.http.scaladsl.testkit.ScalatestRouteTest
 import me.caradverts.service.InMemCarAdvertService
+import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.{Matchers, WordSpec}
 
-class CarAdvertsServiceTest extends WordSpec with Matchers {
+import scala.concurrent.Future
+
+class CarAdvertsServiceTest extends WordSpec with Matchers with ScalaFutures with ScalatestRouteTest {
 
   trait TestContext {
     val service = new InMemCarAdvertService
@@ -13,27 +17,32 @@ class CarAdvertsServiceTest extends WordSpec with Matchers {
 
   "CarAdvertsService" should {
     "save advertisement" in new TestContext {
-      service.addOrModify(carAdvert) shouldBe None
-      service.find(id) shouldBe Some(carAdvert)
+      whenReady(service.addOrModify(carAdvert))(_ shouldBe false)
+      whenReady(service.find(id))(_ shouldBe Some(carAdvert))
     }
 
     "update advertisement" in new TestContext {
-      service.addOrModify(carAdvert) shouldBe None
+      whenReady(service.addOrModify(carAdvert))(_ shouldBe None)
       val newValue = randomAdvert().copy(id = id)
-      service.addOrModify(newValue) shouldBe defined
-      service.find(id) shouldBe Some(newValue)
+
+      whenReady(service.addOrModify(newValue))(_ shouldBe true)
+      whenReady(service.find(id))(_ shouldBe Some(newValue))
     }
 
     "delete advertisement" in new TestContext {
-      service.addOrModify(carAdvert) shouldBe None
-      service.delete(id) shouldBe defined
-      service.find(id) shouldBe None
+      whenReady(service.addOrModify(carAdvert))(_ shouldBe false)
+      whenReady(service.delete(id))(_ shouldBe true)
+      whenReady(service.find(id))(_ shouldBe None)
     }
 
     "list all advertisements" in new TestContext {
       val testValues = randomAdverts(5)
-      testValues.foreach(service.addOrModify)
-      service.findAll(None) should contain allElementsOf testValues
+
+      whenReady(Future.sequence(testValues.map(service.addOrModify))) { bools =>
+        whenReady(service.findAll(None)) { result =>
+          result should contain allElementsOf testValues
+        }
+      }
     }
   }
 }
