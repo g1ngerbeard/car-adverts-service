@@ -1,16 +1,14 @@
 package me.caradverts
 
-import me.caradverts.common.{EmbeddedMongoSupport, DefaultSpec}
-import me.caradverts.config.MongoStorageConfig
-import me.caradverts.service.MongoCardAdvertService
+import me.caradverts.common.DefaultSpec
+import me.caradverts.service.InMemCarAdvertService
 
 import scala.concurrent.Future
 
-class CarAdvertsServiceTest extends DefaultSpec with EmbeddedMongoSupport {
+class CarAdvertsServiceTest extends DefaultSpec {
 
   trait TestContext {
-    val service = new MongoCardAdvertService(MongoStorageConfig("localhost", 12345))
-
+    val service = new InMemCarAdvertService
     val carAdvert = randomAdvert()
     val id = carAdvert.id
   }

@@ -1,3 +1,9 @@
+import com.typesafe.sbt.SbtNativePackager.autoImport._
+import com.typesafe.sbt.packager.archetypes.JavaAppPackaging
+import com.typesafe.sbt.packager.docker.DockerPlugin
+import com.typesafe.sbt.packager.docker.DockerPlugin.autoImport._
+import spray.revolver.RevolverPlugin.autoImport.Revolver
+
 name := "car-adverts-service"
 
 version := "1.0"
@@ -26,3 +32,9 @@ libraryDependencies ++= {
     "de.flapdoodle.embed" % "de.flapdoodle.embed.mongo" % embedMongo % "test"
   )
 }
+
+Revolver.settings
+enablePlugins(JavaAppPackaging)
+enablePlugins(DockerPlugin)
+
+dockerEntrypoint := Seq("bin/%s" format executableScriptName.value)

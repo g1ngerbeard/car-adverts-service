@@ -22,4 +22,5 @@ trait StorageConfig
 
 object InMemStorageConfig extends StorageConfig
 
+//todo: db name
 case class MongoStorageConfig(host: String, port: Int) extends StorageConfig

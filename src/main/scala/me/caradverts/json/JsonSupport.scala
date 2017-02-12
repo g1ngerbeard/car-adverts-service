@@ -11,7 +11,6 @@ import spray.json._
 
 object DateParser {
 
-  //  todo: make it an implicit convertion
   val formatter = DateTimeFormatter
     // todo: use JS date format
     .ofPattern("yyyy-MM-dd")

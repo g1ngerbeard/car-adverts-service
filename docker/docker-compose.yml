@@ -1,6 +1,17 @@
 mongo:
   image: mongo:3.4.2
+  net: host
   expose:
     - "27017"
   ports:
     - "27017:27017"
+
+caradvertsservice:
+  image: car-adverts-service:1.0
+  net: host
+  expose:
+    - "9999"
+  ports:
+    - "9999:9999"
+  environment:
+    - HTTP_PORT=9999

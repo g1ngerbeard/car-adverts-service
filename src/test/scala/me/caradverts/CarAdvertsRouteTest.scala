@@ -3,7 +3,6 @@ package me.caradverts
 import akka.http.scaladsl.model.StatusCodes._
 import akka.http.scaladsl.model.{HttpEntity, MediaTypes}
 import me.caradverts.common.DefaultSpec
-import me.caradverts.json.JsonSupport
 import me.caradverts.model.CarAdvert
 import me.caradverts.rest.CarAdvertsRoute
 import me.caradverts.service.InMemCarAdvertService
@@ -14,7 +13,7 @@ import scala.util.Random
 
 class CarAdvertsRouteTest extends DefaultSpec {
 
-  trait TestContext extends JsonSupport {
+  trait TestContext {
     val service = new InMemCarAdvertService
     val route = new CarAdvertsRoute(service).route
 
