@@ -1,6 +1,5 @@
 package me.caradverts.service
 
-import org.mongodb.scala.model.UpdateOptions
 import me.caradverts.config.MongoStorageConfig
 import me.caradverts.json.JsonSupport
 import me.caradverts.model.CarAdvert
@@ -19,14 +18,20 @@ class MongoCardAdvertService(cfg: MongoStorageConfig)
     .getDatabase("db")
     .getCollection("adverts")
 
-  override def addOrModify(carAdvert: CarAdvert): Future[Boolean] = {
+  def create(carAdvert: CarAdvert): Future[CarAdvert] = {
     val document = Document(carAdvert.toJson.toString) + ("_id" -> carAdvert.id)
+    advertsCollection
+      .insertOne(document)
+      .toFuture()
+      .map(seq => carAdvert)
+  }
 
-    advertsCollection.updateOne(
-      Filters.eq("_id", carAdvert.id),
-      document,
-      UpdateOptions().upsert(true)
-    ).toFuture().map(_.nonEmpty)
+  def update(carAdvert: CarAdvert): Future[CarAdvert] = {
+    val document = Document(carAdvert.toJson.toString) + ("_id" -> carAdvert.id)
+    advertsCollection
+      .replaceOne(Filters.eq("_id", carAdvert.id), document)
+      .toFuture()
+      .map(res => carAdvert)
   }
 
   override def findAllUnsorted(): Future[List[CarAdvert]] = {
@@ -43,11 +48,11 @@ class MongoCardAdvertService(cfg: MongoStorageConfig)
       .map(_.headOption.map(document2CardAdvert))
   }
 
-  override def delete(id: Int): Future[Boolean] = {
+  override def delete(id: Int): Future[Int] = {
     advertsCollection
       .deleteOne(Filters.eq("_id", id))
       .toFuture()
-      .map(_.headOption.exists(result => result.getDeletedCount > 0))
+      .map(_.head.getDeletedCount.toInt)
   }
 
   private def document2CardAdvert(document: Document): CarAdvert = {

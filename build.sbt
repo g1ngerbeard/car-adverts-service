@@ -11,6 +11,7 @@ libraryDependencies ++= {
   val typeSafeConfigVersion = "1.3.1"
   val awsScalaVersion = "0.5.+"
   val mongoDriverVersion = "1.2.1"
+  val embedMongo = "1.21"
 
   Seq(
     "com.typesafe.akka" %% "akka-http-core" % akkaHttpVersion,
@@ -21,6 +22,7 @@ libraryDependencies ++= {
     "org.slf4j" % "slf4j-nop" % slf4jVersion,
     "com.typesafe" % "config" % typeSafeConfigVersion,
     "com.github.seratch" %% "awscala" % awsScalaVersion,
-    "org.mongodb.scala" %% "mongo-scala-driver" % mongoDriverVersion
+    "org.mongodb.scala" %% "mongo-scala-driver" % mongoDriverVersion,
+    "de.flapdoodle.embed" % "de.flapdoodle.embed.mongo" % embedMongo % "test"
   )
 }

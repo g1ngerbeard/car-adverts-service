@@ -2,48 +2,40 @@ package me.caradverts
 
 import akka.http.scaladsl.model.StatusCodes._
 import akka.http.scaladsl.model.{HttpEntity, MediaTypes}
-import akka.http.scaladsl.testkit.ScalatestRouteTest
-import me.caradverts.config.MongoStorageConfig
+import me.caradverts.common.DefaultSpec
 import me.caradverts.json.JsonSupport
 import me.caradverts.model.CarAdvert
 import me.caradverts.rest.CarAdvertsRoute
-import me.caradverts.service.{MongoCardAdvertService, InMemCarAdvertService}
-import org.scalatest.concurrent.ScalaFutures._
+import me.caradverts.service.InMemCarAdvertService
 import org.scalatest.enablers.Sortable
-import org.scalatest.{Matchers, WordSpec}
 import spray.json._
 
 import scala.util.Random
 
-class CarAdvertsRouteTest extends WordSpec with Matchers with ScalatestRouteTest {
+class CarAdvertsRouteTest extends DefaultSpec {
 
   trait TestContext extends JsonSupport {
-
-//    val service = new InMemCarAdvertService
-    val service = new MongoCardAdvertService(MongoStorageConfig("localhost", 27017))
-
+    val service = new InMemCarAdvertService
     val route = new CarAdvertsRoute(service).route
 
     val existingAdverts = onboardAdverts(3)
 
     def onboardAdverts(number: Int): List[CarAdvert] = {
       val adverts = randomAdverts(number)
-      adverts.foreach(service.addOrModify)
+      adverts.foreach(service.create)
       adverts
     }
   }
 
   "Car advertisements REST service" should {
     "create advert" in new TestContext {
-
       val advert = randomAdvert()
+      service.find(advert.id).futureValue shouldBe None
       val body = advert.toJson.toString
-
       val requestEntity = HttpEntity(MediaTypes.`application/json`, body)
 
       Post("/adverts", requestEntity) ~> route ~> check {
-        response.status shouldBe Created
-        whenReady(service.find(advert.id))(_ shouldBe defined)
+        service.find(advert.id).futureValue shouldBe defined
       }
     }
 
@@ -53,8 +45,7 @@ class CarAdvertsRouteTest extends WordSpec with Matchers with ScalatestRouteTest
 
       val requestEntity = HttpEntity(MediaTypes.`application/json`, newAdvert.toJson.toString)
 
-      Post("/adverts", requestEntity) ~> route ~> check {
-        response.status shouldBe OK
+      Put("/adverts", requestEntity) ~> route ~> check {
         whenReady(service.find(existingId))(_ shouldBe Some(newAdvert))
       }
     }
@@ -79,8 +70,7 @@ class CarAdvertsRouteTest extends WordSpec with Matchers with ScalatestRouteTest
       val existindId = existingAdverts(2).id
 
       Delete(s"/adverts/$existindId") ~> route ~> check {
-        response.status shouldBe OK
-        whenReady(service.find(existindId))(_ shouldBe None)
+        service.find(existindId).futureValue shouldBe None
       }
     }
 

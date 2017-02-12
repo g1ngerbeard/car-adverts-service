@@ -30,12 +30,19 @@ class CarAdvertsRoute(service: CarAdvertService)(implicit executionContext: Exec
       } ~
         post {
           entity(as[CarAdvert]) { carAdvert =>
-            complete(service.addOrModify(carAdvert).map(if (_) OK else Created))
+            complete(service.create(carAdvert))
+          }
+        } ~
+        put {
+          entity(as[CarAdvert]) { carAdvert =>
+            complete(service.update(carAdvert))
           }
         } ~
         delete {
           pathPrefix(IntNumber) { id =>
-            complete(service.delete(id).map(if (_) OK else NotFound))
+            onSuccess(service.delete(id)) { response =>
+              complete(NoContent)
+            }
           }
         }
     }

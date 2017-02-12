@@ -6,8 +6,9 @@ import scala.concurrent.{ExecutionContext, Future}
 
 trait CarAdvertService {
 
-  // todo: split into update and insert
-  def addOrModify(carAdvert: CarAdvert): Future[Boolean]
+  def create(carAdvert: CarAdvert): Future[CarAdvert]
+
+  def update(carAdvert: CarAdvert): Future[CarAdvert]
 
   def find(id: Int): Future[Option[CarAdvert]]
 
@@ -31,6 +32,6 @@ trait CarAdvertService {
 
   def findAllUnsorted(): Future[List[CarAdvert]]
 
-  def delete(id: Int): Future[Boolean]
+  def delete(id: Int): Future[Int]
 
 }
