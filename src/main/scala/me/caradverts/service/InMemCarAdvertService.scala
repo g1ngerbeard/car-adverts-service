@@ -18,12 +18,12 @@ class InMemCarAdvertService extends CarAdvertService {
     }
   }
 
-  override def update(carAdvert: CarAdvert): Future[CarAdvert] = {
+  override def update(carAdvert: CarAdvert): Future[Option[CarAdvert]] = {
     if (storage.contains(carAdvert.id)) {
       storage += (carAdvert.id -> carAdvert)
-      Future.successful(carAdvert)
+      Future.successful(Some(carAdvert))
     } else {
-      Future.failed(new IllegalArgumentException("Not found"))
+      Future.successful(None)
     }
   }
 
@@ -32,8 +32,10 @@ class InMemCarAdvertService extends CarAdvertService {
   override def find(id: Int): Future[Option[CarAdvert]] = Future.successful(storage.get(id))
 
   override def delete(id: Int): Future[Int] = {
-    storage.remove(id)
-    Future.successful(1)
+    Future.successful(storage.remove(id) match {
+      case Some(_) => 1
+      case _ => 0
+    })
   }
 
 }

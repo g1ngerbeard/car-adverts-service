@@ -25,11 +25,14 @@ class MongoCardAdvertService(cfg: MongoStorageConfig)
       .map(seq => carAdvert)
   }
 
-  def update(carAdvert: CarAdvert): Future[CarAdvert] = {
+  def update(carAdvert: CarAdvert): Future[Option[CarAdvert]] = {
     advertsCollection
       .replaceOne(Filters.eq("_id", carAdvert.id), cardAdvert2document(carAdvert))
       .toFuture()
-      .map(res => carAdvert)
+      .map{
+        case Seq(result) if result.getMatchedCount > 0 => Some(carAdvert)
+        case _ => None
+      }
   }
 
   override def findAllUnsorted(): Future[List[CarAdvert]] = {
@@ -57,7 +60,7 @@ class MongoCardAdvertService(cfg: MongoStorageConfig)
     document.toJson().parseJson.convertTo[CarAdvert]
   }
 
-  private def cardAdvert2document(carAdvert: CarAdvert): Document= {
+  private def cardAdvert2document(carAdvert: CarAdvert): Document = {
     Document(carAdvert.toJson.toString) + ("_id" -> carAdvert.id)
   }
 }

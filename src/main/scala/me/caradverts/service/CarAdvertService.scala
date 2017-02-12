@@ -8,7 +8,7 @@ trait CarAdvertService {
 
   def create(carAdvert: CarAdvert): Future[CarAdvert]
 
-  def update(carAdvert: CarAdvert): Future[CarAdvert]
+  def update(carAdvert: CarAdvert): Future[Option[CarAdvert]]
 
   def find(id: Int): Future[Option[CarAdvert]]
 

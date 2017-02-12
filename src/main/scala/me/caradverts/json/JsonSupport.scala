@@ -12,7 +12,6 @@ import spray.json._
 object DateParser {
 
   val formatter = DateTimeFormatter
-    // todo: use JS date format
     .ofPattern("yyyy-MM-dd")
     .withLocale(ENGLISH)
     .withZone(systemDefault())

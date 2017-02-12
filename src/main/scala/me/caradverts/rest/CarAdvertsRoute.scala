@@ -44,15 +44,18 @@ class CarAdvertsRoute(service: CarAdvertService, allowedOrigin: String)(implicit
             }
           } ~
           put {
-            // todo: return not found
             entity(as[CarAdvert]) { carAdvert =>
-              complete(service.update(carAdvert))
+              onSuccess(service.update(carAdvert)) {
+                case Some(advert) => complete(advert.toJson)
+                case _ => complete(NotFound)
+              }
             }
           } ~
           delete {
             pathPrefix(IntNumber) { id =>
-              onSuccess(service.delete(id)) { response =>
-                complete(NoContent)
+              onSuccess(service.delete(id)) {
+                case 0 => complete(NotFound)
+                case _ => complete(NoContent)
               }
             }
           }

@@ -2,6 +2,7 @@ package me.caradverts
 
 import akka.http.scaladsl.model.StatusCodes._
 import akka.http.scaladsl.model.{HttpEntity, MediaTypes}
+import akka.http.scaladsl.server.MalformedRequestContentRejection
 import me.caradverts.common.DefaultSpec
 import me.caradverts.model.CarAdvert
 import me.caradverts.rest.CarAdvertsRoute
@@ -49,6 +50,16 @@ class CarAdvertsRouteTest extends DefaultSpec {
       }
     }
 
+    "return 404 when updating non-existing advert" in new TestContext {
+      val newAdvert = randomAdvert()
+
+      val requestEntity = HttpEntity(MediaTypes.`application/json`, newAdvert.toJson.toString)
+
+      Put("/adverts", requestEntity) ~> route ~> check {
+        status shouldBe NotFound
+      }
+    }
+
     "return existing advert" in new TestContext {
       val advert = existingAdverts(1)
 
@@ -61,7 +72,7 @@ class CarAdvertsRouteTest extends DefaultSpec {
       val randomId = Random.nextInt(Int.MaxValue)
 
       Get(s"/adverts/$randomId") ~> route ~> check {
-        response.status shouldBe NotFound
+        status shouldBe NotFound
       }
     }
 
@@ -70,6 +81,14 @@ class CarAdvertsRouteTest extends DefaultSpec {
 
       Delete(s"/adverts/$existindId") ~> route ~> check {
         service.find(existindId).futureValue shouldBe None
+      }
+    }
+
+    "return 404 when deleting non-existing advert" in new TestContext {
+      val randomId = Random.nextInt(Int.MaxValue)
+
+      Delete(s"/adverts/$randomId") ~> route ~> check {
+        status shouldBe NotFound
       }
     }
 
@@ -91,6 +110,49 @@ class CarAdvertsRouteTest extends DefaultSpec {
 
     "list adverts sorted by firstRegistration" in sortingContext("firstRegistration", _.firstRegistration)
 
+    "fail on missing data" in new TestContext {
+      val requiredFields = List("id", "title", "price", "fuel", "new")
+
+      requiredFields.foreach { fieldName =>
+        val body = JsObject(carAdvertFields - fieldName).toString
+        val requestEntity = HttpEntity(MediaTypes.`application/json`, body)
+
+        Post("/adverts", requestEntity) ~> route ~> check {
+          rejection match {
+            case MalformedRequestContentRejection(message, _) => message.contains("Object is missing required member")
+          }
+        }
+      }
+    }
+
+    "fail on invalid data" in new TestContext {
+      val invalidFields = List("id", "price", "fuel", "new", "mileage", "firstRegistration")
+
+      invalidFields.foreach { fieldName =>
+          val body = JsObject(carAdvertFields + (fieldName -> JsString("invalid"))).toString
+          val requestEntity = HttpEntity(MediaTypes.`application/json`, body)
+
+          Post("/adverts", requestEntity) ~> route ~> check {
+            assert(rejection.isInstanceOf[MalformedRequestContentRejection])
+          }
+      }
+    }
+  }
+
+  val carAdvertFields: Map[String, JsValue] = {
+    val json =
+      s"""
+         |{
+         |"id": 1,
+         |"title": "volvo",
+         |"price": 100000,
+         |"fuel": "gasoline",
+         |"new": false,
+         |"mileage": 100000,
+         |"firstRegistration": "1999-07-22"
+         |}
+      """.stripMargin
+    json.parseJson.asJsObject.fields
   }
 
   def sortingContext[T](fieldName: String, mapper: CarAdvert => T)(implicit sortable: Sortable[List[T]]) = {
@@ -100,12 +162,4 @@ class CarAdvertsRouteTest extends DefaultSpec {
       }
     }
   }
-
-  //  todo: car adverts rest service should:
-
-  //  fail on incorrect data (id, title, fuel, price, isNew, mileage, registration)
-  //  fail on missing data (id, title, fuel, price, isNew, old car without mileage and registration)
-
-  //  handle CORS
-
 }
