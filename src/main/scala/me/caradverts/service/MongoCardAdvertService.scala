@@ -1,9 +1,10 @@
 package me.caradverts.service
 
+import com.mongodb.DuplicateKeyException
 import me.caradverts.config.MongoStorageConfig
 import me.caradverts.json.JsonSupport
 import me.caradverts.model.CarAdvert
-import org.mongodb.scala.MongoClient
+import org.mongodb.scala.{MongoClient, MongoException}
 import org.mongodb.scala.bson.collection.immutable.Document
 import org.mongodb.scala.model.Filters
 import spray.json._
@@ -18,18 +19,21 @@ class MongoCardAdvertService(cfg: MongoStorageConfig)
     .getDatabase(cfg.databaseName)
     .getCollection("adverts")
 
-  def create(carAdvert: CarAdvert): Future[CarAdvert] = {
+  def create(carAdvert: CarAdvert): Future[Option[CarAdvert]] = {
     advertsCollection
       .insertOne(cardAdvert2document(carAdvert))
       .toFuture()
-      .map(seq => carAdvert)
+      .map(seq => Some(carAdvert))
+      .recover {
+        case _: DuplicateKeyException  | _: MongoException => None
+      }
   }
 
   def update(carAdvert: CarAdvert): Future[Option[CarAdvert]] = {
     advertsCollection
       .replaceOne(Filters.eq("_id", carAdvert.id), cardAdvert2document(carAdvert))
       .toFuture()
-      .map{
+      .map {
         case Seq(result) if result.getMatchedCount > 0 => Some(carAdvert)
         case _ => None
       }

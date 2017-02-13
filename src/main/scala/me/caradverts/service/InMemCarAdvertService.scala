@@ -9,12 +9,12 @@ class InMemCarAdvertService extends CarAdvertService {
 
   val storage: TrieMap[Int, CarAdvert] = TrieMap()
 
-  override def create(carAdvert: CarAdvert): Future[CarAdvert] = {
+  override def create(carAdvert: CarAdvert): Future[Option[CarAdvert]] = {
     if (storage.contains(carAdvert.id)) {
-      Future.failed(new IllegalArgumentException("Already exists"))
+      Future.successful(None)
     } else {
       storage += (carAdvert.id -> carAdvert)
-      Future.successful(carAdvert)
+      Future.successful(Some(carAdvert))
     }
   }
 

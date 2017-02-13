@@ -39,6 +39,16 @@ class CarAdvertsRouteTest extends DefaultSpec {
       }
     }
 
+    "fail to create advert with existing id" in new TestContext {
+      val advert = existingAdverts(1)
+      val body = advert.toJson.toString
+      val requestEntity = HttpEntity(MediaTypes.`application/json`, body)
+
+      Post("/adverts", requestEntity) ~> route ~> check {
+        status shouldBe Conflict
+      }
+    }
+
     "update advert" in new TestContext {
       val existingId = existingAdverts(2).id
       val newAdvert = randomAdvert().copy(id = existingId)

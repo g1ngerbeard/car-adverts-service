@@ -40,7 +40,10 @@ class CarAdvertsRoute(service: CarAdvertService, allowedOrigin: String)(implicit
         } ~
           post {
             entity(as[CarAdvert]) { carAdvert =>
-              complete(service.create(carAdvert))
+              onSuccess(service.create(carAdvert)){
+                case Some(_) => complete(OK)
+                case None => complete(Conflict)
+              }
             }
           } ~
           put {
