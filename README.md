@@ -10,7 +10,7 @@ Service exposes REST endpoint with CRUD operations on car advertisements.
  used;
  * **mileage** (_only for used cars_): **integer**;
  * **first registration** (_only for used cars_): **date** without
- time.
+ time (yyyy-MM-dd format).
 
 ## Api:
 * GET _/adverts_ - list all available car adverts
