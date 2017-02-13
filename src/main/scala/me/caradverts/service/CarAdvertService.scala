@@ -6,7 +6,7 @@ import scala.concurrent.{ExecutionContext, Future}
 
 trait CarAdvertService {
 
-  def create(carAdvert: CarAdvert): Future[CarAdvert]
+  def create(carAdvert: CarAdvert): Future[Option[CarAdvert]]
 
   def update(carAdvert: CarAdvert): Future[Option[CarAdvert]]
 
