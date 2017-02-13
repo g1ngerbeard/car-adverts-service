@@ -37,7 +37,7 @@ For MongoDb connection:
 * `DB_PORT` - default: 27017
 * `DB_NAME` - database name, default: db
 
-To run service using sbt type:
+In order to run service using sbt type:
 ```
 sbt run
 ```
